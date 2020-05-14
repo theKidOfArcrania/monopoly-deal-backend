@@ -1,0 +1,81 @@
+-- By default this file is used by `persistFileWith` in Model.hs (which is imported by Foundation.hs)
+-- Syntax for this file here: https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
+
+File json
+  longId Text
+  UniqueLongId longId
+  deriving Eq Show Read
+CardDeck json
+  name Text
+  coverImage FileId
+  unit Text
+  deriving Eq Show Read
+AllowedAction json
+  name Text
+  desc Text
+  type ActionType
+  icon FileId
+  targetType TargetType
+  ofDeck CardDeckId
+  deriving Eq Show Read
+Color json
+  name Text
+  rgbCode Int
+  ofDeck CardDeckId
+  UniqueColor rgbCode ofDeck
+  deriving Eq Show Read
+CardSpecs json
+  desc Text
+  type CardType
+  partOf CardDeckId
+  sellValue Int
+  value Int
+  name Text
+  image FileId
+  color ColorId
+  count Int
+  deriving Eq Show Read
+User json
+  profile FileId Maybe default=NULL
+  displayName Text
+  userName Text
+  email Text
+  password Text maxlength=64
+  deriving Eq Show
+  UniqueEmail email
+  UniqueUserName userName
+Game json
+  creator PlayerId
+  usesDeck CardDeckId
+  finished Bool
+  discardSize Int
+  drawSize Int
+  deriving Eq Show Read
+Player json
+  playing GameId
+  user UserId
+  isPaying Bool
+  turnNum Int Maybe default=NULL
+  UniquePlayer playing user
+  deriving Eq Show Read
+Card json
+  spec CardSpecsId
+  type CardType
+  ofGame GameId
+  location CardLocation
+  ofPlayer PlayerId Maybe default=NULL
+  ofDiscard Int Maybe default=NULL
+  ofPropColor ColorId Maybe default=NULL
+  InDiscardList ofGame ofDiscard !force
+  deriving Eq Show Read
+Action json
+  ofGame GameId
+  type AllowedActionId
+  maker PlayerId
+  targets PlayerId Maybe default=NULL
+  deriving Eq Show Read
+Involves json
+  card CardId
+  action ActionId
+  UniqueCardAction card action
+  deriving Eq Show Read
