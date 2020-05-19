@@ -1,30 +1,30 @@
 -- By default this file is used by `persistFileWith` in Model.hs (which is imported by Foundation.hs)
 -- Syntax for this file here: https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
 
-File json
+File json doc
   longId Text
   UniqueLongId longId
-  deriving Eq Show Read
-CardDeck json
+  deriving Eq Show Read Typeable
+CardDeck json doc
   name Text
   coverImage FileId
   unit Text
-  deriving Eq Show Read
-AllowedAction json
+  deriving Eq Show Read Typeable
+AllowedAction json doc
   name Text
   desc Text
   type ActionType
   icon FileId
   targetType TargetType
   ofDeck CardDeckId
-  deriving Eq Show Read
-Color json
+  deriving Eq Show Read Typeable
+Color json doc
   name Text
   rgbCode Int
   ofDeck CardDeckId
   UniqueColor rgbCode ofDeck
-  deriving Eq Show Read
-CardSpecs json
+  deriving Eq Show Read Typeable
+CardSpecs json doc
   desc Text
   type CardType
   partOf CardDeckId
@@ -34,8 +34,8 @@ CardSpecs json
   image FileId
   color ColorId
   count Int
-  deriving Eq Show Read
-User json
+  deriving Eq Show Read Typeable
+User json doc
   profile FileId Maybe default=NULL
   displayName Text
   userName Text
@@ -44,21 +44,21 @@ User json
   deriving Eq Show
   UniqueEmail email
   UniqueUserName userName
-Game json
+Game json doc
   creator PlayerId
   usesDeck CardDeckId
   finished Bool
   discardSize Int
   drawSize Int
-  deriving Eq Show Read
-Player json
+  deriving Eq Show Read Typeable
+Player json doc
   playing GameId
   user UserId
   isPaying Bool
   turnNum Int Maybe default=NULL
   UniquePlayer playing user
-  deriving Eq Show Read
-Card json
+  deriving Eq Show Read Typeable
+Card json doc
   spec CardSpecsId
   type CardType
   ofGame GameId
@@ -67,15 +67,15 @@ Card json
   ofDiscard Int Maybe default=NULL
   ofPropColor ColorId Maybe default=NULL
   InDiscardList ofGame ofDiscard !force
-  deriving Eq Show Read
-Action json
+  deriving Eq Show Read Typeable
+Action json doc
   ofGame GameId
   type AllowedActionId
   maker PlayerId
   targets PlayerId Maybe default=NULL
-  deriving Eq Show Read
-Involves json
+  deriving Eq Show Read Typeable
+Involves json doc
   card CardId
   action ActionId
   UniqueCardAction card action
-  deriving Eq Show Read
+  deriving Eq Show Read Typeable

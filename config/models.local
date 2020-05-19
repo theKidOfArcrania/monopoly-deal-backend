@@ -1,0 +1,9 @@
+NewUser json doc
+  userName Text
+  password Text
+  email    Text
+  deriving Eq Show Read Typeable
+UserAuth json doc
+  userName Text
+  password Text
+  deriving Eq Show Read Typeable

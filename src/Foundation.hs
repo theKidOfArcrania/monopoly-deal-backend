@@ -80,7 +80,7 @@ instance Yesod App where
   errorHandler :: ErrorResponse -> HandlerFor App TypedContent
   errorHandler err = do
     m <- errorHandlerMsg err
-    return $ toTypedContent $ toJSON $ m
+    return $ toTypedContent $ toJSON m
 
   -- Yesod Middleware allows you to run code before and after each handler function.
   -- The defaultYesodMiddleware adds the response header "Vary: Accept, Accept-Language" and performs authorization checks.
@@ -128,19 +128,18 @@ instance Yesod App where
   makeLogger :: App -> IO Logger
   makeLogger = return . appLogger
 
-errorHandlerMsg :: ErrorResponse -> HandlerFor App Message
-errorHandlerMsg (InvalidArgs ia) = return $ msg400 "Invalid arguments" ia
+errorHandlerMsg :: ErrorResponse -> HandlerFor App (Message [Text])
+errorHandlerMsg (InvalidArgs ia) = return $ msg400P "Invalid arguments" ia
 errorHandlerMsg NotAuthenticated = do
   rend <- getUrlRender
-  return $ msg401 "Not logged in" $ toJSON $ rend $ ApiR JsonLoginR
+  return $ msg401P "Not logged in" [rend $ ApiR JsonLoginR]
 errorHandlerMsg (PermissionDenied m) =
-  return $ msg403 ("Permission Denied. " <> m) Null
-errorHandlerMsg NotFound = return $ msg404 "Invalid path" Null
-errorHandlerMsg (BadMethod m) = return $ msg405 "Bad method" 
-  $ TSE.decodeUtf8 m
+  return $ msg403 ("Permission Denied. " <> m) 
+errorHandlerMsg NotFound = return $ msg404 "Invalid path"
+errorHandlerMsg (BadMethod m) = return $ msg405P "Bad method" [TSE.decodeUtf8 m]
 errorHandlerMsg (InternalError e) = do
   $logErrorS "Foundation" e
-  return $ msg500 "Internal server error" e
+  return $ msg500P "Internal server error" [e]
 
 instance YesodAuth App where
   type AuthId App = UserId
@@ -164,8 +163,8 @@ instance YesodAuth App where
       Nothing -> return $ UserError InvalidLogin
 
   -- Nothing
-  authPlugins :: App -> [AuthPlugin App]
-  authPlugins app = []
+  -- authPlugins :: App -> [AuthPlugin App]
+  -- authPlugins app = []
 
 isAuthenticated :: Handler AuthResult
 isAuthenticated = do

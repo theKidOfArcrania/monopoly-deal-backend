@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7417839a67bab8be969032781b0593b3c139687640a969261500a2f5fb5ce86c
+-- hash: 261323852a85c40a2c7fc9ed31ea60d48002978b76ba2eed482cecc2efcb58c3
 
 name:           monopoly-deal
 version:        0.1.0
@@ -23,6 +23,8 @@ flag library-only
 library
   exposed-modules:
       Application
+      Data.Swagger.Ext
+      DocGen
       Foundation
       Handler.Common
       Handler.Games
@@ -33,8 +35,6 @@ library
       Model
       Model.Cards
       Model.Message
-      Model.NewUser
-      Model.UserAuth
       Settings
       Settings.StaticFiles
   other-modules:
@@ -43,6 +43,7 @@ library
       src
   build-depends:
       aeson >=1.4 && <1.5
+    , aeson-pretty
     , base >=4.9.1.0 && <5
     , bytestring >=0.10 && <0.11
     , case-insensitive
@@ -60,6 +61,8 @@ library
     , http-client-tls >=0.3 && <0.4
     , http-conduit >=2.3 && <2.4
     , http-types
+    , insert-ordered-containers
+    , lens
     , monad-control >=0.3 && <1.1
     , monad-logger >=0.3 && <0.4
     , mysql >=0.1.4
@@ -67,7 +70,10 @@ library
     , persistent-mysql >=2.9 && <2.11
     , persistent-template >=2.5 && <2.9
     , safe
+    , servant
+    , servant-swagger
     , shakespeare >=2.0 && <2.1
+    , swagger2
     , template-haskell
     , text >=0.11 && <2.0
     , time
@@ -97,9 +103,10 @@ executable monopoly-deal
       Paths_monopoly_deal
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N -ddump-splices
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson >=1.4 && <1.5
+    , aeson-pretty
     , base >=4.9.1.0 && <5
     , bytestring >=0.10 && <0.11
     , case-insensitive
@@ -117,6 +124,8 @@ executable monopoly-deal
     , http-client-tls >=0.3 && <0.4
     , http-conduit >=2.3 && <2.4
     , http-types
+    , insert-ordered-containers
+    , lens
     , monad-control >=0.3 && <1.1
     , monad-logger >=0.3 && <0.4
     , monopoly-deal
@@ -125,7 +134,10 @@ executable monopoly-deal
     , persistent-mysql >=2.9 && <2.11
     , persistent-template >=2.5 && <2.9
     , safe
+    , servant
+    , servant-swagger
     , shakespeare >=2.0 && <2.1
+    , swagger2
     , template-haskell
     , text >=0.11 && <2.0
     , time
@@ -162,6 +174,7 @@ test-suite monopoly-deal-test
   ghc-options: -Wall
   build-depends:
       aeson >=1.4 && <1.5
+    , aeson-pretty
     , base >=4.9.1.0 && <5
     , bytestring >=0.10 && <0.11
     , case-insensitive
@@ -180,6 +193,8 @@ test-suite monopoly-deal-test
     , http-client-tls >=0.3 && <0.4
     , http-conduit >=2.3 && <2.4
     , http-types
+    , insert-ordered-containers
+    , lens
     , monad-control >=0.3 && <1.1
     , monad-logger >=0.3 && <0.4
     , monopoly-deal
@@ -188,7 +203,10 @@ test-suite monopoly-deal-test
     , persistent-mysql >=2.9 && <2.11
     , persistent-template >=2.5 && <2.9
     , safe
+    , servant
+    , servant-swagger
     , shakespeare >=2.0 && <2.1
+    , swagger2
     , template-haskell
     , text >=0.11 && <2.0
     , time

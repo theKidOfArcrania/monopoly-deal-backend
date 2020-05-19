@@ -20,4 +20,5 @@ cabal.sandbox.config
 *~
 \#*
 haserver.cabal
-/dump
+/dump*
+/exptest
