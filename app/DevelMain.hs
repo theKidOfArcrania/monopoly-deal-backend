@@ -37,7 +37,7 @@
 module DevelMain where
 
 import Prelude
-import Application (getApplicationRepl, shutdownApp)
+import MonopolyDeal.Application (getApplicationRepl, shutdownApp)
 
 import Control.Monad ((>=>))
 import Control.Concurrent

@@ -8,7 +8,7 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Application
+module MonopolyDeal.Application
     ( getApplicationDev
     , appMain
     , develMain
@@ -31,7 +31,7 @@ import Control.Monad.Logger                 (liftLoc, runLoggingT)
 import Database.Persist.MySQL               (createMySQLPool, myConnInfo,
                                              myPoolSize, runSqlPool)
 import qualified Database.MySQL.Base as MySQL
-import Import
+import MonopolyDeal.Import
 import Language.Haskell.TH.Syntax           (qLocation)
 import Network.HTTP.Client.TLS              (getGlobalManager)
 import Network.Wai (Middleware)
@@ -49,10 +49,10 @@ import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
 
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
-import Handler.Common
-import Handler.Home
-import Handler.Games
-import Handler.Login
+import MonopolyDeal.Handler.Common
+import MonopolyDeal.Handler.Home
+import MonopolyDeal.Handler.Games
+import MonopolyDeal.Handler.Login
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the

@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies      #-}
 {-# LANGUAGE NoImplicitPrelude #-}
-module Handler.Login 
+module MonopolyDeal.Handler.Login 
   ( postJsonLoginR
   , postSignupR
   ) where
-import Import
+import MonopolyDeal.Import
 
 -- TODO: change these to actual errors
 badPass :: MonadHandler m => m a

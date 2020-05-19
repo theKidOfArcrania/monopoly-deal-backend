@@ -12,12 +12,12 @@
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE AllowAmbiguousTypes        #-}
 {-# LANGUAGE DeriveGeneric              #-}
-module Model where
+module MonopolyDeal.Model where
 
-import Model.Cards
+import MonopolyDeal.Model.Cards
 import ClassyPrelude.Yesod
 import Database.Persist.Quasi
-import DocGen
+import Data.Docs.DocGen
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities

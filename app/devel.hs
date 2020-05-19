@@ -1,5 +1,5 @@
 {-# LANGUAGE PackageImports #-}
-import "monopoly-deal" Application (develMain)
+import "monopoly-deal" MonopolyDeal.Application (develMain)
 import Prelude (IO)
 
 main :: IO ()

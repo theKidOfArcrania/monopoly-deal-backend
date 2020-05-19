@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE DeriveGeneric   #-}
-module Model.Cards where
+module MonopolyDeal.Model.Cards where
 
 import Database.Persist.TH
 import Data.Aeson.Types

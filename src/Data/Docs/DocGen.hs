@@ -11,7 +11,7 @@
 {-# LANGUAGE FlexibleInstances          #-}
 {-# OPTIONS_GHC -fno-warn-orphans       #-}
 
-module DocGen where
+module Data.Docs.DocGen where
 
 import ClassyPrelude.Yesod 
   ( BackendKey, SqlBackend, MkPersistSettings, EntityDef, FieldType(..)

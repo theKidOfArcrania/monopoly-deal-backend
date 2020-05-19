@@ -8,7 +8,7 @@
 -- In addition, you can configure a number of different aspects of Yesod
 -- by overriding methods in the Yesod typeclass. That instance is
 -- declared in the Foundation.hs file.
-module Settings where
+module MonopolyDeal.Settings where
 
 import ClassyPrelude.Yesod
 import qualified Control.Exception as Exception

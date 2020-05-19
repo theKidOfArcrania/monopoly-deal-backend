@@ -1,6 +1,6 @@
-module Handler.Games where
+module MonopolyDeal.Handler.Games where
 
-import Import
+import MonopolyDeal.Import
 
 getGamesR :: Handler Value
 getGamesR = error "Not yet implemented: getGamesR"

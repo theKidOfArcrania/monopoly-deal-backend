@@ -6,7 +6,7 @@
 {-# LANGUAGE FlexibleInstances  #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
-module Model.Message where
+module MonopolyDeal.Model.Message where
 
 import Data.Text
 import GHC.Generics

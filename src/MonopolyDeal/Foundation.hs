@@ -9,12 +9,13 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE FlexibleContexts #-}
 
-module Foundation where
+module MonopolyDeal.Foundation where
 
-import Import.NoFoundation
+import MonopolyDeal.Import.NoFoundation
+
+import Control.Monad.Logger (LogSource)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Jasmine         (minifym)
-import Control.Monad.Logger (LogSource)
 
 import Yesod.Auth.Message   (AuthMessage(InvalidLogin))
 import Yesod.Default.Util   (addStaticContentExternal)

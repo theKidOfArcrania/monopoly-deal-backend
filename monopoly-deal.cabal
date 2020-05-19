@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 261323852a85c40a2c7fc9ed31ea60d48002978b76ba2eed482cecc2efcb58c3
+-- hash: f83aac17e20015347978dd5faa0aaac245ceb9b6f5539b33ca0316853640df57
 
 name:           monopoly-deal
 version:        0.1.0
@@ -22,21 +22,21 @@ flag library-only
 
 library
   exposed-modules:
-      Application
+      Data.Docs.DocGen
       Data.Swagger.Ext
-      DocGen
-      Foundation
-      Handler.Common
-      Handler.Games
-      Handler.Home
-      Handler.Login
-      Import
-      Import.NoFoundation
-      Model
-      Model.Cards
-      Model.Message
-      Settings
-      Settings.StaticFiles
+      MonopolyDeal.Application
+      MonopolyDeal.Foundation
+      MonopolyDeal.Handler.Common
+      MonopolyDeal.Handler.Games
+      MonopolyDeal.Handler.Home
+      MonopolyDeal.Handler.Login
+      MonopolyDeal.Import
+      MonopolyDeal.Import.NoFoundation
+      MonopolyDeal.Model
+      MonopolyDeal.Model.Cards
+      MonopolyDeal.Model.Message
+      MonopolyDeal.Settings
+      MonopolyDeal.Settings.StaticFiles
   other-modules:
       Paths_monopoly_deal
   hs-source-dirs:
