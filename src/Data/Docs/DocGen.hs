@@ -37,13 +37,6 @@ data DocModel = DocModel
   { docName :: Text
   }
 
-instance ToSchema (BackendKey SqlBackend) where
-  declareNamedSchema _ = declareNamedSchema (Proxy :: Proxy Int64)
-
-instance ToParamSchema (BackendKey SqlBackend) where
-  toParamSchema _ = toParamSchema (Proxy :: Proxy Int64)
-
-
 entName :: EntityDef -> String
 entName = unpack . unHaskellName . entityHaskell
 
@@ -84,8 +77,7 @@ mkSchema settings ent = do
           , assignD (mkName "__entname") $ LitE $ StringL $ unpack $ entName ent
           ]
         , BindS (VarP $ mkName "__types") (VarE 'mapM `AppE` VarE 'id 
-          `AppE` (ListE $ map (AppE (VarE 'declareSchemaRef) . (SigE proxyE)
-            . proxyOf . ftToType . fieldType) ents))
+          `AppE` (ListE $ map (AppE (VarE 'declareSchemaRef) . (SigE proxyE) . proxyOf . ftToType . fieldType) ents))
         , NoBindS body
         ]
       ]

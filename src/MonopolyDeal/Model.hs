@@ -1,40 +1,24 @@
-{-# LANGUAGE EmptyDataDecls             #-}
-{-# LANGUAGE FlexibleInstances          #-}
-{-# LANGUAGE GADTs                      #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE NoImplicitPrelude          #-}
-{-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE TemplateHaskell            #-}
-{-# LANGUAGE TypeFamilies               #-}
-{-# LANGUAGE DerivingStrategies         #-}
-{-# LANGUAGE StandaloneDeriving         #-}
-{-# LANGUAGE UndecidableInstances       #-}
-{-# LANGUAGE AllowAmbiguousTypes        #-}
-{-# LANGUAGE DeriveGeneric              #-}
-module MonopolyDeal.Model where
+module MonopolyDeal.Model 
+  ( module MonopolyDeal.Model ) where
 
-import MonopolyDeal.Model.Cards
 import ClassyPrelude.Yesod
-import Database.Persist.Quasi
-import Data.Docs.DocGen
+import MonopolyDeal.Model.Persist as MonopolyDeal.Model
+import MonopolyDeal.Model.Local   as MonopolyDeal.Model
 
--- You can define all of your database entities in the entities file.
--- You can find more information on persistent and how to declare entities
--- at:
--- http://www.yesodweb.com/book/persistent/
-share [mkPersist sqlSettings, mkMigrate "migrateAll", mkModels sqlSettings "docPersist"] 
-  $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
-
-share [mkPersist sqlSettings, mkModels sqlSettings "docLocal"] 
-  $(persistFileWith lowerCaseSettings "config/models.local")
-
-toUserEntity :: NewUser -> User
-toUserEntity ent = User
+toUser :: NewUser -> User
+toUser ent = User
   { userProfile     = Nothing
   , userUserName    = newUserUserName ent
   , userDisplayName = newUserUserName ent
   , userEmail       = newUserEmail ent
   , userPassword    = newUserPassword ent}
 
-
+toGame :: NewGame -> UTCTime -> Game
+toGame ent time = Game 
+  { gameCreator     = Nothing
+  , gameCreated     = time
+  , gameUsesDeck    = newGameUsesDeck ent
+  , gameFinished    = False
+  , gameDiscardSize = 0
+  , gameDrawSize    = 0
+  }

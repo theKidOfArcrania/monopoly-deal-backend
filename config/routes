@@ -4,12 +4,14 @@
 /static StaticR Static appStatic
 
 /favicon.ico FaviconR GET
-/robots.txt RobotsR GET
+/robots.txt  RobotsR GET
 
 / HomeR GET
 
 -- Override !auth with !noauth
 /api/v1/ ApiR !auth:
-  /games GamesR GET POST
-  /login JsonLoginR POST !noauth
-  /signup SignupR POST !noauth
+  /login        JsonLoginR POST !noauth
+  /signup       SignupR    POST !noauth
+  /game         GamesR     GET POST
+  /game/#GameId GameR      GET
+  /game/#GameId/status GameStatusR  GET

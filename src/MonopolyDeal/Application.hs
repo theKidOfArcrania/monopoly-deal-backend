@@ -1,13 +1,13 @@
-{-# LANGUAGE CPP                  #-}
-{-# LANGUAGE RankNTypes           #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE CPP                   #-}
+{-# LANGUAGE RankNTypes            #-}
+{-# LANGUAGE NoImplicitPrelude     #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE ViewPatterns          #-}
+{-# LANGUAGE RecordWildCards       #-}
+{-# OPTIONS_GHC -fno-warn-orphans  #-}
 module MonopolyDeal.Application
     ( getApplicationDev
     , appMain

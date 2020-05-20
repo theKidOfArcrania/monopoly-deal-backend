@@ -45,7 +45,8 @@ User json doc
   UniqueEmail email
   UniqueUserName userName
 Game json doc
-  creator PlayerId
+  creator PlayerId Maybe
+  created UTCTime default=CURRENT_TIME
   usesDeck CardDeckId
   finished Bool
   discardSize Int

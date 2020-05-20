@@ -11,15 +11,6 @@ import MonopolyDeal.Import
 badPass :: MonadHandler m => m a
 badPass = permissionDenied "Invalid username or password"
 
-success :: Text -> Value
-success m = toJSON $ (msg200 m :: Message ())
-
-chkExists :: (MonadIO m, PersistUniqueRead backend, PersistEntity record, 
-             PersistEntityBackend record ~ BaseBackend backend) =>
-               Unique record -> ReaderT backend m (Bool)
-chkExists uniq = getBy uniq >>= return . isJust
-
-
 postJsonLoginR :: Handler Value
 postJsonLoginR = do
   uauth <- requireCheckJsonBody :: Handler UserAuth
@@ -42,6 +33,6 @@ postSignupR = do
     badEmail <- chkExists $ UniqueEmail $ newUserEmail unew
     when badEmail (invalidArgs ["Email already exists"])
 
-    _ <- insert $ toUserEntity unew
+    _ <- insert $ toUser unew
     return $ success "Successfully created account, now log in."
 

@@ -208,10 +208,36 @@ instance YesodPersistRunner App where
 --          else return $ UserError InvalidLogin
 --     Nothing -> return $ UserError InvalidLogin
 
-
-
 unsafeHandler :: App -> Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
+
+chkExists :: (MonadIO m, PersistUniqueRead backend, PersistEntity record, 
+             PersistEntityBackend record ~ BaseBackend backend) =>
+               Unique record -> ReaderT backend m (Bool)
+chkExists uniq = getBy uniq >>= return . isJust
+
+chkExistsId :: (MonadIO m, PersistUniqueRead backend, PersistEntity record, 
+              PersistEntityBackend record ~ BaseBackend backend) =>
+                Key record -> ReaderT backend m (Bool)
+chkExistsId ident = get ident >>= return . isJust
+
+-- Fetches an entity by ID, and requires the entity to exist, otherwise bails
+-- out with an invalid argument
+requireId :: (MonadIO m, PersistUniqueRead backend, PersistEntity record, 
+  MonadHandler m, PersistEntityBackend record ~ BaseBackend backend) =>
+    Text -> Key record -> ReaderT backend m (record)
+requireId entName key = do
+  ment <- get key
+  case ment of
+    Just ent -> pure ent
+    Nothing -> invalidArgs ["Invalid " <> entName <> "!"]
+
+success :: Text -> Value
+success m = toJSON $ (msg200 m :: Message ())
+
+getServantAPI :: App -> WaiSubsite
+getServantAPI = WaiSubsite . error "stuff"
+
 
 -- Note: Some functionality previously present in the scaffolding has been
 -- moved to documentation in the Wiki. Following are some hopefully helpful
