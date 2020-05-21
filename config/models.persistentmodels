@@ -56,7 +56,7 @@ Player json doc
   playing GameId
   user UserId
   isPaying Bool
-  turnNum Int Maybe default=NULL
+  turnNum TurnNum
   UniquePlayer playing user
   deriving Eq Show Read Typeable
 Card json doc

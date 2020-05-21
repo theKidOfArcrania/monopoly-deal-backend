@@ -17,7 +17,6 @@
 module MonopolyDeal.Model.Persist where
 
 import ClassyPrelude.Yesod
-import Data.Aeson (ToJSONKey, FromJSONKey)
 import Data.Docs.DocGen
 import Database.Persist.Quasi
 import MonopolyDeal.Model.Cards
@@ -30,7 +29,3 @@ import MonopolyDeal.Model.Entity()
 -- http://www.yesodweb.com/book/persistent/
 share [mkPersist sqlSettings, mkMigrate "migrateAll", mkModels sqlSettings "docPersist"] 
   $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
-
--- deriving instance Generic PlayerId
-instance ToJSONKey PlayerId
-instance FromJSONKey PlayerId

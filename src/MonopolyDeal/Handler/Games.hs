@@ -35,7 +35,7 @@ postGamesR = do
       { playerPlaying = gid
       , playerUser = uid
       , playerIsPaying = True
-      , playerTurnNum = Nothing 
+      , playerTurnNum = TNotPlaying
       }
     update gid [GameCreator =. Just pid]
 

@@ -4,6 +4,7 @@ module MonopolyDeal.Model
 import ClassyPrelude.Yesod
 import MonopolyDeal.Model.Persist as MonopolyDeal.Model
 import MonopolyDeal.Model.Local   as MonopolyDeal.Model
+import MonopolyDeal.Model.Message as MonopolyDeal.Model
 
 toUser :: NewUser -> User
 toUser ent = User

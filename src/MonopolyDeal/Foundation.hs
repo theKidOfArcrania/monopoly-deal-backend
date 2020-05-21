@@ -233,7 +233,7 @@ requireId entName key = do
     Nothing -> invalidArgs ["Invalid " <> entName <> "!"]
 
 success :: Text -> Value
-success m = toJSON $ (msg200 m :: Message ())
+success m = toJSON $ (msg200 m :: Message Nil)
 
 getServantAPI :: App -> WaiSubsite
 getServantAPI = WaiSubsite . error "stuff"

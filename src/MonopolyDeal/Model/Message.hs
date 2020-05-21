@@ -10,6 +10,7 @@ module MonopolyDeal.Model.Message where
 
 import Data.Text
 import GHC.Generics
+import Data.Aeson
 import Data.Aeson.Types
 import Network.HTTP.Types 
 
@@ -17,10 +18,22 @@ import Data.Proxy        (Proxy(..))
 import Data.Swagger      
   (ToSchema, Referenced(..), SwaggerType(..), NamedSchema(..)
   , declareNamedSchema, genericDeclareNamedSchema, defaultSchemaOptions
-  , type_, properties, minimum_, maximum_
+  , example, type_, properties, minimum_, maximum_
   )
 import Data.Swagger.Ext  (ToSchema1, OuterBot, liftInnerSchema)
 import Control.Lens ((&), (?~), (.~))
+
+data Nil = Nil deriving (Eq, Read, Show)
+instance ToJSON Nil where
+  toJSON _ = Null
+instance FromJSON Nil where
+  parseJSON Null = pure Nil
+  parseJSON _ = mempty
+instance ToSchema Nil where
+  declareNamedSchema _ = pure $ NamedSchema Nothing (mempty
+    -- & type_ ?~ SwaggerNull
+    & type_ ?~ SwaggerObject -- since null is not allowed
+    & example ?~ Null)
 
 msg200 :: Text -> Message payload
 msg200 = _msg status200
@@ -70,19 +83,20 @@ instance ToJSON1 Message
 instance FromJSON1 Message
 
 instance ToSchema1 Message where
-  newtype OuterBot Message = MessageBot (Message ())
+  newtype OuterBot Message = MessageBot (Message Nil)
   liftInnerSchema _ rinner = return [Inline $ mempty
     & type_ ?~ SwaggerObject
     & properties .~ [("payload", rinner)]]
 instance ToSchema (OuterBot Message) where 
   declareNamedSchema _ = 
-    genericDeclareNamedSchema defaultSchemaOptions (Proxy :: Proxy (Message ()))
+    genericDeclareNamedSchema defaultSchemaOptions (Proxy :: Proxy (Message Nil))
 
 instance ToSchema (Status) where
-  declareNamedSchema _ = pure $ NamedSchema Nothing mempty
+  declareNamedSchema _ = pure $ NamedSchema Nothing $ mempty
     & type_ ?~ SwaggerInteger
     & minimum_ ?~ 0
     & maximum_ ?~ 599
+    & example  ?~ Number 200
 
 
 instance ToJSON Status where 
