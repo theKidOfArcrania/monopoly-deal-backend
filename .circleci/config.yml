@@ -1,0 +1,36 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: fpco/stack-build:lts
+    steps:
+      - checkout
+      - restore_cache:
+          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+          name: Restore Cached Dependencies
+          keys:
+            - cci-demo-haskell-v1-{{ checksum "stack.yaml" }}-{{ checksum "package.yaml" }}
+            - cci-demo-haskell-v1-{{ checksum "stack.yaml" }}
+            # For now we load up our previous cache build
+            - cci-demo-haskell-v1-Ki8L70GttDK2+ilNoKgGDg22B8bja5TSMEUsfURHq2o=-qAYb5JI36BVLRdKzcUkIdPSe6qIQBCrZraioDm6fZjk=
+      - run:
+          name: Resolve/Update Dependencies
+          command: stack --no-terminal setup
+# Disable tests for now
+#      - run:
+#          name: Run tests
+#          command: stack --no-terminal test
+      - run:
+          name: Install executable
+          command: stack --no-terminal install
+      - save_cache:
+          name: Cache Dependencies
+          key: cci-demo-haskell-v1-{{ checksum "stack.yaml" }}-{{ checksum "package.yaml" }}
+          paths:
+            - "/root/.stack"
+            - ".stack-work"
+      - store_artifacts:
+          # Upload test summary for display in Artifacts: https://circleci.com/docs/2.0/artifacts/ 
+          path: ~/.local/bin/monopoly-deal
+          destination: monopoly-deal
+
