@@ -16,20 +16,14 @@ import Control.Lens             ((&), (.~), (?~))
 import Data.Aeson               (encode)
 import Data.Swagger
 
-import Language.Haskell.TH      (Exp(..), Lit(..), runIO)
 import MonopolyDeal.Model
 import MonopolyDeal.Model.Util
-import MonopolyDeal.Swagger     (latestVersion)
-import MonopolyDeal.VersionMgmt (swaggerPath)
+import MonopolyDeal.VersionMgmt (swaggerPath, nextVersion, Version)
 import Servant.API
 import Servant.Swagger
-import System.Directory         (listDirectory)
 
 
 import qualified Data.ByteString.Lazy as B
-
-data Version = Version {major :: Int, minor :: Int, incremental :: Int}
-  deriving (Eq, Show)
 
 declareEndpoint "LoginP" 
   [t|"login"  :> ReqBody '[JSON] UserAuth :> Post '[JSON] (Message Nil)|]
@@ -61,7 +55,7 @@ mpdSwagger = toSwagger pAll
   & info.title       .~ "Monopoly Deal API"
   & info.description ?~ "This is an API for the Monopoly Deal Game"
   & info.license     ?~ ("GNUv3" & url ?~ URL "https://www.gnu.org/licenses/")
-  & info.version     .~ pack (show latestVersion)
+  -- & info.version     .~ pack (show nextVersion)
   & applyTagsFor  socAuth ["auth" & description ?~ "Authenticating to service"]
   & applyTagsFor  socGame ["game" & description ?~ "Game status operations"]
   & soLoginP.summary     ?~ "Authenticate with username and password"  
@@ -85,11 +79,16 @@ mpdSwagger = toSwagger pAll
     "occurs earlier in the list. Eventually this should only filter out " <>
     "only the latest actions so to minimize the size of the request"
 
-swaggerDoc :: B.ByteString
-swaggerDoc = encode $ prependPath "/api/v1" mpdSwagger
+swaggerDoc :: Version -> B.ByteString
+swaggerDoc vers = encode $ prependPath "/api/v1" mpdSwagger
+  & info.version .~ pack (show vers)
 
 writeDocsAt :: FilePath -> IO ()
-writeDocsAt path = B.writeFile path swaggerDoc
+writeDocsAt docPath = do
+  nextVer <- nextVersion
+  B.writeFile docPath $ swaggerDoc nextVer
 
 writeDocs :: IO ()
-writeDocs = writeDocsAt $ unpack (swaggerPath latestVersion)
+writeDocs = do
+  nextVer <- nextVersion
+  writeDocsAt $ unpack $ swaggerPath nextVer

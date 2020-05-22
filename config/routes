@@ -20,4 +20,4 @@
 /viewapi/ ViewApiR:
   /              ApiUIR          GET
   /swagger.html  SwaggerFrontR   GET
-  /spec/#SwaggerVersion/swagger.json SwaggerR GET
+  /spec/#Version/swagger.json SwaggerR GET

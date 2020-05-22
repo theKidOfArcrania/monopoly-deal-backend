@@ -32,11 +32,16 @@ readInt s = case reads $ takeWhile isDigit s of
               [(num, "")] -> [(num, dropWhile isDigit s)]
               _ -> []
 
-data Version = Version {major :: Int, minor :: Int, incremental :: Int}
+data Version = Version {major :: Int, minor :: Int, incremental :: Int} 
+  deriving (Eq, Ord, Hashable, Generic, ToJSON, FromJSON, ToJSONKey, FromJSONKey)
+  
 instance Read Version where
   readsPrec _ inp = maybeToList $ parseVersion "v" "." inp
 instance Show Version where
   show = showVersion "v" "."
+instance PathPiece Version where
+  toPathPiece = pack . show
+  fromPathPiece = parseVersionSfx "v" "." "" . unpack
 
 parseVersion :: String -> String -> String -> Maybe (Version, String)
 parseVersion pref sep inp = do 
@@ -60,9 +65,6 @@ showVersion pref sep vers =
   pref <> (show $ major vers) <> sep <> (show $ minor vers) 
     <> sep <> (show $ incremental vers)
 
-versName :: Version -> Name
-versName = mkName . showVersion "V" "_"
-
 swaggerDir :: FilePath
 swaggerDir = "config/swagger/"
 
@@ -73,11 +75,12 @@ swaggerPath ver = swaggerDir ++ show ver ++ ".json"
 queryVersions :: IO [Version]
 queryVersions = do
   lst <- listDirectory swaggerDir
-  pure $ concat $ map (maybeToList . parseVersionSfx "v" "." ".json") lst
+  pure $ reverse $ sort $ concat $
+    map (maybeToList . parseVersionSfx "v" "." ".json") lst
 
 -- Obtains the next available incremental version number
 nextIncrement :: IO Int
-nextIncrement = map length queryVersions
+nextIncrement = map ((+)1 . length) queryVersions
 
 -- Obtains the next available version number
 nextVersion :: IO Version
@@ -89,19 +92,21 @@ mkSwagger :: Q [Dec]
 mkSwagger = do
   vers <- runIO queryVersions 
   files <- mapM go vers
-  pure [ SigD filesName (ListT `AppT` tupleT [ConT eVersName, ConT ''Content])
+  pure [ SigD filesName (ListT `AppT` tupleT [ConT ''Version, ConT ''Content])
        , assignD filesName $ ListE files
-       , enumD eVersName (map versName vers)
-          [''Read, ''Eq, ''Show, ''Generic, ''ToJSON, ''FromJSON
-          , ''ToJSONKey, ''FromJSONKey, ''Hashable]
-       , SigD versName2 (ListT `AppT` ConT eVersName)
-       , assignD versName2 $ ListE $ map (ConE . versName) vers]
+--       , enumD eVersName (map versName vers)
+--          [''Read, ''Eq, ''Show, ''Generic, ''ToJSON, ''FromJSON
+--          , ''ToJSONKey, ''FromJSONKey, ''Hashable]
+       , SigD versName (ListT `AppT` ConT ''Version)
+       , assignD versName $ ListE $ map versE vers]
  where go ver = do
          f <- embedFile (swaggerPath ver)
-         pure $ TupE [ConE $ versName ver, VarE 'toContent `AppE` f]
+         pure $ TupE [versE ver, VarE 'toContent `AppE` f]
        filesName = mkName "swaggerFiles"
-       versName2 = mkName "versions"
-       eVersName = mkName "SwaggerVersion"
+       versName = mkName "versions"
+       versE v = foldl' AppE (ConE 'Version) $ map 
+         (LitE . IntegerL . fromIntegral . app v) [major, minor, incremental]
+       app e fn = fn e
 
 assignD :: Name -> Exp -> Dec
 assignD var expr = ValD (VarP var) (NormalB expr) []

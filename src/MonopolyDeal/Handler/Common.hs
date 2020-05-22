@@ -23,12 +23,9 @@ getRobotsR :: Handler TypedContent
 getRobotsR = return $ TypedContent typePlain
                     $ toContent $(embedFile "config/robots.txt")
 
-swaggerFiles2 :: InsOrd.InsOrdHashMap SwaggerVersion Content
-swaggerFiles2 = InsOrd.fromList swaggerFiles
-
-getSwaggerR :: SwaggerVersion -> Handler TypedContent
+getSwaggerR :: Version -> Handler TypedContent
 getSwaggerR vers = do
-  let res = InsOrd.lookup vers swaggerFiles2
+  let res = InsOrd.lookup vers swaggerFilesMap
   case res of
     Just cont -> pure $ TypedContent typeJson cont
     Nothing -> notFound

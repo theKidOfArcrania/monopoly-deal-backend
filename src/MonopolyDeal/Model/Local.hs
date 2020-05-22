@@ -28,7 +28,8 @@ data GameStatus = GameStatus
   } deriving (Eq, Read, Show, Generic, Typeable)
 
 data NewGame = NewGame
-  { newGameUsesDeck :: CardDeckId
+  { newGameName     :: Text, 
+    newGameUsesDeck :: CardDeckId
   } deriving (Eq, Read, Show, Generic, Typeable)
 
 data CreatedGame = CreatedGame

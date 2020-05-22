@@ -30,8 +30,8 @@ instance FromJSON Nil where
   parseJSON _ = mempty
 instance ToSchema Nil where
   declareNamedSchema _ = pure $ NamedSchema Nothing (mempty
-    & type_ ?~ SwaggerNull)
-    -- & type_ ?~ SwaggerObject -- since null is not allowed
+    -- & type_ ?~ SwaggerNull)
+    & type_ ?~ SwaggerObject) -- since null is not allowed
     -- & example ?~ Null)
 
 msg200 :: Text -> Message payload

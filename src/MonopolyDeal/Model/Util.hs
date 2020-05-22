@@ -29,11 +29,15 @@ recordStrip pref = lcaseFirst . maybeStripPrefix pref
 
 entDSOptions :: String -> DS.SchemaOptions
 entDSOptions pref =
-  DS.defaultSchemaOptions {DS.fieldLabelModifier = recordStrip pref}
+  DS.defaultSchemaOptions 
+    { DS.fieldLabelModifier = recordStrip pref
+    , DS.unwrapUnaryRecords = True }
 
 entDAOptions :: String -> DA.Options
 entDAOptions pref =
-  DA.defaultOptions {DA.fieldLabelModifier = recordStrip pref}
+  DA.defaultOptions 
+    { DA.fieldLabelModifier = recordStrip pref
+    , DA.unwrapUnaryRecords = True }
 
 deriveAll :: Name -> Q [Dec]
 deriveAll cls = do

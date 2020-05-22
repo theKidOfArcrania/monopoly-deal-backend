@@ -7,24 +7,15 @@ module MonopolyDeal.Handler.SwaggerFront where
 import Prelude ()
 import MonopolyDeal.Import
 
-versionString :: SwaggerVersion -> String
-versionString vers = 
-  map repl $ show vers
- where repl '_' = '.'
-       repl 'V' = 'v'
-       repl c = c
-
-verParam :: Text
-verParam = "ver"
-
 getApiUIR :: Handler Html
 getApiUIR = defaultLayout $ do
   rend <- getUrlRenderParams
   req <- getRequest
-  ver <- map (maybe "Latest version" versionString) $ maybeParam verParam
+  ver <- map (maybe "Latest version" show) $
+    (maybeParam verParam :: MonadHandler m => m (Maybe Version))
   let innerUrl = rend (ViewApiR SwaggerFrontR) $ reqGetParams req
       jumpVer v = rend (ViewApiR ApiUIR) $
-        [(verParam, pack $ show (v :: SwaggerVersion))]
+        [(verParam, pack $ show (v :: Version))]
 
 
   setTitle "Monopoly Deal API"
@@ -54,7 +45,7 @@ getApiUIR = defaultLayout $ do
                 Latest version
               $forall v <- versions
                 <a class="dropdown-item" href="#{jumpVer v}">
-                  #{versionString v}
+                  #{show v}
     <div class="d-flex flex-column" style="height: 100%">
       <iframe src="#{innerUrl}" class="border-none"
         style="flex-grow: 1; border: none;">

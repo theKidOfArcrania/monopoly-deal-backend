@@ -10,6 +10,7 @@ import MonopolyDeal.Model.Cards           as MonopolyDeal.Import
 import MonopolyDeal.Settings              as MonopolyDeal.Import
 import MonopolyDeal.Settings.StaticFiles  as MonopolyDeal.Import
 import MonopolyDeal.Swagger               as MonopolyDeal.Import
+import MonopolyDeal.VersionMgmt           as MonopolyDeal.Import
 import Yesod.Auth                         as MonopolyDeal.Import
 import Yesod.Core.Types                   as MonopolyDeal.Import (loggerSet)
 import Yesod.Default.Config2              as MonopolyDeal.Import
