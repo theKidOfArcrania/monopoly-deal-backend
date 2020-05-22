@@ -11,6 +11,8 @@ jobs:
           keys:
             - cci-demo-haskell-v1-{{ checksum "stack.yaml" }}-{{ checksum "package.yaml" }}
             - cci-demo-haskell-v1-{{ checksum "stack.yaml" }}
+            # For now we load up our previous cache build
+            - cci-demo-haskell-v1-Ki8L70GttDK2+ilNoKgGDg22B8bja5TSMEUsfURHq2o=-qAYb5JI36BVLRdKzcUkIdPSe6qIQBCrZraioDm6fZjk=
       - run:
           name: Resolve/Update Dependencies
           command: stack --no-terminal setup
