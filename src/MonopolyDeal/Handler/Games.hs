@@ -59,3 +59,12 @@ getGameStatusR gid = do
       , gameStatusPlayers = Data.Map.fromList $ map (\e ->
           (entityKey e, entityVal e)) players
       }
+
+getGameHistoryR :: GameId -> Handler Value
+getGameHistoryR gid = do
+  runDB $ do
+    _ <- requireId "game" gid
+    actions <- selectList [ActionOfGame ==. gid] [Desc ActionMadeAt]
+    pure $ toJSON $ History $ map entityVal actions
+ 
+

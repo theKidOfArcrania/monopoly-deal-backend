@@ -71,6 +71,7 @@ Card json doc
   deriving Eq Show Read Typeable
 Action json doc
   ofGame GameId
+  madeAt UTCTime default=CURRENT_TIME
   type AllowedActionId
   maker PlayerId
   targets PlayerId Maybe default=NULL

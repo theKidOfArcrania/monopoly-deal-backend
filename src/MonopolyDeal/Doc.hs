@@ -8,19 +8,28 @@
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeSynonymInstances       #-}
 {-# LANGUAGE FlexibleInstances          #-}
-module MonopolyDeal.Doc (API, swaggerDoc, writeDocs) where
+{-# LANGUAGE NoImplicitPrelude          #-}
+module MonopolyDeal.Doc (API, swaggerDoc, writeDocs, writeDocsAt) where
 
+import ClassyPrelude.Yesod
 import Control.Lens             ((&), (.~), (?~))
-import Data.Aeson
-import Data.Aeson.Encode.Pretty (encodePretty)
+import Data.Aeson               (encode)
 import Data.Swagger
 
+import Language.Haskell.TH      (Exp(..), Lit(..), runIO)
 import MonopolyDeal.Model
 import MonopolyDeal.Model.Util
+import MonopolyDeal.Swagger     (latestVersion)
+import MonopolyDeal.VersionMgmt (swaggerPath)
 import Servant.API
 import Servant.Swagger
+import System.Directory         (listDirectory)
+
 
 import qualified Data.ByteString.Lazy as B
+
+data Version = Version {major :: Int, minor :: Int, incremental :: Int}
+  deriving (Eq, Show)
 
 declareEndpoint "LoginP" 
   [t|"login"  :> ReqBody '[JSON] UserAuth :> Post '[JSON] (Message Nil)|]
@@ -35,29 +44,33 @@ declareEndpoint "GameIdG"
   [t|"game" :> Capture "gid" GameId :> Get '[JSON] (Message Game)|]
 declareEndpoint "GameIdStatusG" [t|"game" :> Capture "gid" GameId :> 
   "status" :> Get '[JSON] (Message GameStatus)|]
+declareEndpoint "GameIdHistG" [t|"game" :> Capture "gid" GameId :> 
+  "history" :> Get '[JSON] (Message History)|]
 declareEndpoint "cGame" [t|APIGameG :<|> APIGameP :<|> APIGameIdG 
-  :<|> APIGameIdStatusG|]
+  :<|> APIGameIdStatusG :<|> APIGameIdHistG|]
 
 declareEndpoint "All" [t|APIcGame :<|> APIcAuth|]
 type API = "api" :> "v1" :> APIAll
 
 declareSubOperationsFor 'pAll 
   [ "LoginP", "SignupP" , "cAuth", "GameG", "GameP", "GameIdG", "GameIdStatusG"
-  , "cGame"]
+  , "cGame", "GameIdHistG"]
 
 mpdSwagger :: Swagger 
-mpdSwagger =  toSwagger pAll
+mpdSwagger = toSwagger pAll
   & info.title       .~ "Monopoly Deal API"
-  & info.version     .~ "0.1"
   & info.description ?~ "This is an API for the Monopoly Deal Game"
   & info.license     ?~ ("GNUv3" & url ?~ URL "https://www.gnu.org/licenses/")
-  & host             ?~ "example.com" -- TODO: change this to real host
+  & info.version     .~ pack (show latestVersion)
   & applyTagsFor  socAuth ["auth" & description ?~ "Authenticating to service"]
   & applyTagsFor  socGame ["game" & description ?~ "Game status operations"]
   & soLoginP.summary     ?~ "Authenticate with username and password"  
   & soSignupP.summary    ?~ "Create new user"  
   & soGameG.summary      ?~ "Obtain all the open public games"  
-  & soGameP.summary      ?~ "Create a new game"  
+  & soGameP.description  ?~ "this provides a list of game information " <> 
+    "similar to the /api/v1/game/{gid} endpoint. It currently gives all " <>
+    "available games, but pagination + private games will be implemented later."
+  & soGameP.summary      ?~ "Create a new game" 
   & soGameP.description  ?~ "Creates a game, making the host as the creator " <>
     "of this game. The host may also choose the card deck (game mode) to " <>
     "from."
@@ -66,9 +79,17 @@ mpdSwagger =  toSwagger pAll
   & soGameIdStatusG.description ?~ "This obtains some basic game " <>
     "information such as current player making moves, and what players are " <>
     "in the game at the moment."
+  & soGameIdHistG.summary       ?~ "Obtain play history of a game"
+  & soGameIdHistG.description   ?~ "This gives a list of all cards that " <>
+    "have been played so far in the specified game, where the latest event " <>
+    "occurs earlier in the list. Eventually this should only filter out " <>
+    "only the latest actions so to minimize the size of the request"
 
 swaggerDoc :: B.ByteString
-swaggerDoc = encodePretty $ prependPath "/api/v1" mpdSwagger
+swaggerDoc = encode $ prependPath "/api/v1" mpdSwagger
 
-writeDocs :: FilePath -> IO ()
-writeDocs path = B.writeFile path swaggerDoc
+writeDocsAt :: FilePath -> IO ()
+writeDocsAt path = B.writeFile path swaggerDoc
+
+writeDocs :: IO ()
+writeDocs = writeDocsAt $ unpack (swaggerPath latestVersion)

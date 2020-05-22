@@ -36,10 +36,13 @@ data CreatedGame = CreatedGame
   , createdGamePlayer  :: PlayerId
   } deriving (Eq, Read, Show, Generic, Typeable)
 
+newtype History = History { unHistory :: [Action] }
+  deriving (Eq, Read, Show, Generic, Typeable)
 
 deriveAll ''UserAuth
 deriveAll ''NewUser
 deriveAll ''GameStatus
 deriveAll ''NewGame
 deriveAll ''CreatedGame
+deriveAll ''History
 

@@ -11,7 +11,7 @@ module MonopolyDeal.Model.Entity where
 
 import Prelude (reads)
 import ClassyPrelude.Yesod  
-  (Entity, Key, Maybe(..), BackendKey, SqlBackend, Int64, ToBackendKey(..)
+  (Entity, Key, Maybe(..), BackendKey, SqlBackend, ToBackendKey(..)
   , fromMaybe, fst, map, mempty, pack, pure, show, uncons, unpack, ($), (.))
 import Control.Lens         ((&), (?~), (.~))
 import Data.Aeson           

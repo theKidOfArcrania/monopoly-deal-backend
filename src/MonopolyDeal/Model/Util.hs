@@ -74,7 +74,6 @@ declareSubOperationsFor pAll subs = do
                        proxName = mkName ("p" ++ sub)
   pure $ concat $ map prod subs
 
-
 assignD :: Name -> Exp -> Dec
 assignD var expr = ValD (VarP var) (NormalB expr) []
 

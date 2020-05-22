@@ -22,7 +22,6 @@ import ClassyPrelude.Yesod
   , (.), ($), (==), (<>)
   ) 
 import Control.Lens ((&), (.~))
-import Data.Aeson
 import Data.Swagger
 import Data.Swagger.Lens
 import GHC.Exts (fromList)

@@ -11,7 +11,6 @@ module MonopolyDeal.Model.Message where
 import Data.Text
 import GHC.Generics
 import Data.Aeson
-import Data.Aeson.Types
 import Network.HTTP.Types 
 
 import Data.Proxy        (Proxy(..))
@@ -31,9 +30,9 @@ instance FromJSON Nil where
   parseJSON _ = mempty
 instance ToSchema Nil where
   declareNamedSchema _ = pure $ NamedSchema Nothing (mempty
-    -- & type_ ?~ SwaggerNull
-    & type_ ?~ SwaggerObject -- since null is not allowed
-    & example ?~ Null)
+    & type_ ?~ SwaggerNull)
+    -- & type_ ?~ SwaggerObject -- since null is not allowed
+    -- & example ?~ Null)
 
 msg200 :: Text -> Message payload
 msg200 = _msg status200

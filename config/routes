@@ -8,10 +8,16 @@
 
 / HomeR GET
 
+
 -- Override !auth with !noauth
 /api/v1/ ApiR !auth:
-  /login        JsonLoginR POST !noauth
-  /signup       SignupR    POST !noauth
-  /game         GamesR     GET POST
-  /game/#GameId GameR      GET
-  /game/#GameId/status GameStatusR  GET
+  /login                JsonLoginR    POST      !noauth
+  /signup               SignupR       POST      !noauth
+  /game                 GamesR        GET POST
+  /game/#GameId         GameR         GET
+  /game/#GameId/status  GameStatusR   GET
+  /game/#GameId/history GameHistoryR  GET
+/viewapi/ ViewApiR:
+  /              ApiUIR          GET
+  /swagger.html  SwaggerFrontR   GET
+  /spec/#SwaggerVersion/swagger.json SwaggerR GET

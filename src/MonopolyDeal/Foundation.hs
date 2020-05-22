@@ -13,6 +13,7 @@ module MonopolyDeal.Foundation where
 
 import MonopolyDeal.Import.NoFoundation
 
+import Prelude              (reads)
 import Control.Monad.Logger (LogSource)
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Jasmine         (minifym)
@@ -235,9 +236,23 @@ requireId entName key = do
 success :: Text -> Value
 success m = toJSON $ (msg200 m :: Message Nil)
 
-getServantAPI :: App -> WaiSubsite
-getServantAPI = WaiSubsite . error "stuff"
+maybeParam :: (MonadHandler m, Read a) => Text -> m (Maybe a)
+maybeParam pname = do
+  mp <- lookupGetParam pname
+  case maybe Nothing (Just . reads . unpack) mp of
+    -- Parameter does not exit
+    Nothing -> pure Nothing
+    -- We have it
+    Just [(val, "")] -> pure $ Just val
+    -- Malformed parameter
+    Just _ -> invalidArgs ["Invalid parameter `" <> pname <> "`"]
 
+requireParam :: (MonadHandler m, Read a) => Text -> m a
+requireParam pname = do
+  mp <- maybeParam pname
+  case mp of
+    Nothing -> invalidArgs ["Missing parameter `" <> pname <> "`"]
+    Just val -> pure val
 
 -- Note: Some functionality previously present in the scaffolding has been
 -- moved to documentation in the Wiki. Following are some hopefully helpful
