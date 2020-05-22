@@ -6,7 +6,6 @@ module MonopolyDeal.Import.NoFoundation
 import ClassyPrelude.Yesod                as MonopolyDeal.Import hiding 
   (Proxy)
 import MonopolyDeal.Model                 as MonopolyDeal.Import
-import MonopolyDeal.Model.Cards           as MonopolyDeal.Import
 import MonopolyDeal.Settings              as MonopolyDeal.Import
 import MonopolyDeal.Settings.StaticFiles  as MonopolyDeal.Import
 import MonopolyDeal.Swagger               as MonopolyDeal.Import

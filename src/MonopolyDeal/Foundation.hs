@@ -49,10 +49,6 @@ data App = App
 -- type Widget = WidgetFor App ()
 mkYesodData "App" $(parseRoutesFile "config/routes")
 
--- | A convenient synonym for database access functions.
-type DB a = forall (m :: * -> *).
-  (MonadUnliftIO m) => ReaderT SqlBackend m a
-
 -- Please see the documentation for the Yesod typeclass. There are a number
 -- of settings which can be configured by overriding methods here.
 instance Yesod App where

@@ -36,15 +36,17 @@ instance ToJSON TargetType
 instance FromJSON TargetType
 instance ToSchema TargetType
 
-data TurnNum = TNotPlaying | T1 | T2 | T3
+data TurnNum = TNotPlaying | TDrawing | T1 | T2 | T3
   deriving (Show, Read, Eq, Generic)
 instance ToJSON TurnNum where
   toJSON TNotPlaying = Null
-  toJSON T1 = Number 1
-  toJSON T2 = Number 2
-  toJSON T3 = Number 3
+  toJSON TDrawing    = Number 0
+  toJSON T1          = Number 1
+  toJSON T2          = Number 2
+  toJSON T3          = Number 3
 instance FromJSON TurnNum where
   parseJSON (Number n) = case n of
+                            0 -> pure TDrawing
                             1 -> pure T1
                             2 -> pure T2
                             3 -> pure T3
@@ -54,12 +56,13 @@ instance FromJSON TurnNum where
 instance ToSchema TurnNum where
   declareNamedSchema _ = pure $ NamedSchema Nothing $ mempty
     & type_        ?~ SwaggerInteger
-    & minimum_     ?~ 1
+    & minimum_     ?~ 0
     & maximum_     ?~ 3
     & description  ?~ "the turn number, can be null if user is not taking a turn"
 
 nextTurn :: TurnNum -> Maybe TurnNum
 nextTurn TNotPlaying = Nothing
+nextTurn TDrawing = Just T1
 nextTurn T1 = Just T2
 nextTurn T2 = Just T3
 nextTurn T3 = Nothing

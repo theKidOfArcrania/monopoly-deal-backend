@@ -1,10 +1,10 @@
-{-# LANGUAGE TupleSections         #-}
-{-# LANGUAGE OverloadedStrings     #-}
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE TemplateHaskellQuotes #-}
-{-# LANGUAGE NoImplicitPrelude     #-}
-{-# LANGUAGE DeriveGeneric         #-}
-{-# LANGUAGE DeriveAnyClass        #-}
+{-# LANGUAGE TupleSections      #-}
+{-# LANGUAGE OverloadedStrings  #-}
+{-# LANGUAGE FlexibleContexts   #-}
+{-# LANGUAGE TemplateHaskell    #-}
+{-# LANGUAGE NoImplicitPrelude  #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE DeriveAnyClass     #-}
 module MonopolyDeal.VersionMgmt where
 
 import Prelude()
@@ -15,6 +15,7 @@ import Data.FileEmbed       (embedFile)
 import Text.Read
 import System.Directory
 import Language.Haskell.TH.Syntax
+import qualified Data.ByteString.Char8 as BS8
 
 -- TODO: update the major/minor versions whenever the Swagger API has
 -- significantly changed. 
@@ -26,6 +27,12 @@ curMinor = 1
 
 verParam :: Text
 verParam = "ver"
+
+-- A little hack to make it "dependent" on this .update file
+-- _incrm :: ByteString
+-- _incrm = $(runIO (try (readFile "config/swagger/.update") >>= either 
+--           (pure . LitE . StringL . ((const "") :: IOException -> String) ) 
+--           (pure . LitE . StringL . BS8.unpack)))
 
 readInt :: String -> [(Int, String)]
 readInt s = case reads $ takeWhile isDigit s of

@@ -50,7 +50,7 @@ dependencies:
 - servant
 - servant-swagger
 - insert-ordered-containers
-- parsec
+- utility-ht
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.
