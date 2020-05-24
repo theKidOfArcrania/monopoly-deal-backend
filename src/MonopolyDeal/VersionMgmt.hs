@@ -28,12 +28,6 @@ curMinor = 1
 verParam :: Text
 verParam = "ver"
 
--- A little hack to make it "dependent" on this .update file
--- _incrm :: ByteString
--- _incrm = $(runIO (try (readFile "config/swagger/.update") >>= either 
---           (pure . LitE . StringL . ((const "") :: IOException -> String) ) 
---           (pure . LitE . StringL . BS8.unpack)))
-
 readInt :: String -> [(Int, String)]
 readInt s = case reads $ takeWhile isDigit s of
               [(num, "")] -> [(num, dropWhile isDigit s)]
@@ -78,6 +72,9 @@ swaggerDir = "config/swagger/"
 swaggerPath :: Version -> FilePath
 swaggerPath ver = swaggerDir ++ show ver ++ ".json"
 
+swaggerDep :: FilePath
+swaggerDep = swaggerDir ++ ".update"
+
 -- Queries all the available versions
 queryVersions :: IO [Version]
 queryVersions = do
@@ -85,20 +82,34 @@ queryVersions = do
   pure $ reverse $ sort $ concat $
     map (maybeToList . parseVersionSfx "v" "." ".json") lst
 
+-- This forces a dependency nudge on all files that depend on the versioning.
+-- Call this function whenever we create a new file to the config/swagger 
+-- directory.
+updateDeps :: IO ()
+updateDeps = do
+  ver <- nextIncrement
+  writeFile swaggerDep $ BS8.pack $ show $ ver
+
 -- Obtains the next available incremental version number
 nextIncrement :: IO Int
-nextIncrement = map ((+)1 . length) queryVersions
+nextIncrement = ((+)1 . length) <$> queryVersions
 
 -- Obtains the next available version number
 nextVersion :: IO Version
-nextVersion = map (Version curMajor curMinor) nextIncrement
+nextVersion = Version curMajor curMinor <$> nextIncrement
 
 -- Obtains all the swagger files loaded as a list of content data. This is then
--- stored at compile-time!
+-- stored at compile-time! This will also automatically add a dependency to any
+-- changes made to that swagger directory
 mkSwagger :: Q [Dec]
 mkSwagger = do
   vers <- runIO queryVersions 
   files <- mapM go vers
+
+  -- Add swagger dependency on the number of files in there.
+  runIO updateDeps
+  qAddDependentFile swaggerDep
+
   pure [ SigD filesName (ListT `AppT` tupleT [ConT ''Version, ConT ''Content])
        , assignD filesName $ ListE files
 --       , enumD eVersName (map versName vers)

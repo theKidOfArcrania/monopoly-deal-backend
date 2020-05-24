@@ -14,15 +14,17 @@ infix 0 <$$>
 getGameR :: GameId -> Handler Value
 getGameR gid = do
   game <- runDB $ requireId "game" gid
-  pure $ toJSON game
+  pure $ toJSON $ msg200P "Success!" $ game
   
--- Provides a list of all currently public games (since there are no permissions
--- yet implemented, this returns every game).
+-- Provides a list of all currently public games (paginated). Since there are no
+-- permissions yet implemented, this returns every game.
 getGamesR :: Handler Value
 getGamesR = do
-  games <- runDB $ selectList [] [] :: Handler [Entity Game]
-  pure $ toJSON games
+  page <- queryPaginate maybeParam
+  games <- runDB $ selectList [] page :: Handler [Entity Game]
+  pure $ toJSON $ msg200P "Success!" $ games
 
+-- Create a new game with a few configuration settings
 postGamesR :: Handler Value
 postGamesR = do
   time <- liftIO getCurrentTime
@@ -38,18 +40,16 @@ postGamesR = do
     pid <- insert $ Player 
       { playerPlaying = gid
       , playerUser = uid
-      , playerIsPaying = True
       , playerTurnNum = TNotPlaying
       }
     update gid [GameCreator =. Just pid]
 
-    -- Return the IDs created
-    let ret = CreatedGame 
-              { createdGameId     = gid
-              , createdGamePlayer = pid
-              }
-    pure $ toJSON $ msg200P "Successfully created game!" ret
+    pure $ toJSON $ msg200P "Successfully created game!" $ CreatedGame 
+      { createdGameId     = gid
+      , createdGamePlayer = pid
+      }
 
+-- Obtain more specific game status information
 getGameStatusR :: GameId -> Handler Value
 getGameStatusR gid = do
   uid <- requireAuthId 
@@ -65,7 +65,7 @@ getGameStatusR gid = do
     -- descending order of discard index
     discardInfos <- toCardInfo <$$> selectList [CardLocation ==. LDiscard] 
       [Desc CardOfDiscard]
-    pure $ toJSON $ GameStatus
+    pure $ toJSON $ msg200P "Success!" $ GameStatus
       { gameStatusGame    = Entity gid game
       , gameStatusMe      = mplayer
       , gameStatusPlayers = Data.Map.fromList $ map 
@@ -74,11 +74,51 @@ getGameStatusR gid = do
       , gameStatusHand    = hand
       }
 
-getGameHistoryR :: GameId -> Handler Value
-getGameHistoryR gid = do
+-- Get a game's history log (paginated)
+getGamePlayR :: GameId -> Handler Value
+getGamePlayR gid = do
+  page <- queryPaginate maybeParam
   runDB $ do
     _ <- requireId "game" gid
-    actions <- selectList [ActionOfGame ==. gid] [Desc ActionMadeAt]
-    pure $ toJSON $ History $ map entityVal actions
+    actions <- selectList [ActionOfGame ==. gid] (Desc ActionMadeAt : page)
+    history <- mapM queryHistoryEnt actions
+    pure $ toJSON $ msg200P "Success!" $ History history
  
+-- Make an action play for a player
+postGamePlayR :: GameId -> Handler Value
+postGamePlayR gid = do
+  action <- requireCheckJsonBody :: Handler NewAction
+  uid <- requireAuthId 
+  runDB $ do
+    -- Require that the user is actually a player of this game
+    _ <- requireId "game" gid
+    ent <- getBy (UniquePlayer gid uid) >>= maybe eNotPlayer pure
+    let pid = entityKey ent
+        player = entityVal ent
+        turn = playerTurnNum player
+        next = nextTurn turn
+
+    -- Process the player's action based on his/her turn number
+    resp <- case turn of
+      TDrawing -> eNotTurn
+      TNotPlaying -> eNotTurn
+      TPaying -> do
+        -- TODO: 
+        error "TODO: implement paying logic"
+      Turn _ -> do
+        -- TODO: 
+        error "TODO: implement playing a regular card"
+
+    -- Advance player's turn
+    update pid [PlayerTurnNum =. next]
+    when (next == TNotPlaying) $ do
+      -- TODO: get next player's turn
+      error "TODO: change to new player's turn"
+      
+    -- TODO: change that type of response!
+    pure $ toJSON $ msg200P "Success!" (resp :: Value) 
+ where eNotPlayer = invalidArgs ["You are not a player of this game"]
+       eNotTurn   = invalidArgs ["Not your turn to play"]
+
+-- TODO: notify original player when they get a response to a card they played
 

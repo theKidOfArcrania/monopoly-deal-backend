@@ -18,7 +18,7 @@ import Data.Swagger
 
 import MonopolyDeal.Model
 import MonopolyDeal.Model.Util
-import MonopolyDeal.VersionMgmt (swaggerPath, nextVersion, Version)
+import MonopolyDeal.VersionMgmt (swaggerPath, nextVersion, updateDeps, Version)
 import Servant.API
 import Servant.Swagger
 
@@ -87,6 +87,7 @@ writeDocsAt :: FilePath -> IO ()
 writeDocsAt docPath = do
   nextVer <- nextVersion
   B.writeFile docPath $ swaggerDoc nextVer
+  updateDeps
 
 writeDocs :: IO ()
 writeDocs = do

@@ -16,7 +16,7 @@
   /game                 GamesR        GET POST
   /game/#GameId         GameR         GET
   /game/#GameId/status  GameStatusR   GET
-  /game/#GameId/history GameHistoryR  GET
+  /game/#GameId/play    GamePlayR     GET POST
 /viewapi/ ViewApiR:
   /              ApiUIR          GET
   /swagger.html  SwaggerFrontR   GET

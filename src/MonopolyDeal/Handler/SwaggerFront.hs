@@ -9,10 +9,10 @@ import MonopolyDeal.Import
 
 getApiUIR :: Handler Html
 getApiUIR = defaultLayout $ do
+  let showVer = show :: Version -> String
   rend <- getUrlRenderParams
   req <- getRequest
-  ver <- map (maybe "Latest version" show) $
-    (maybeParam verParam :: MonadHandler m => m (Maybe Version))
+  ver <- maybe "Latest version" showVer <$> maybeParam verParam
   let innerUrl = rend (ViewApiR SwaggerFrontR) $ reqGetParams req
       jumpVer v = rend (ViewApiR ApiUIR) $
         [(verParam, pack $ show (v :: Version))]

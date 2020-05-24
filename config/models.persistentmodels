@@ -55,8 +55,7 @@ Game json doc
 Player json doc
   playing GameId
   user UserId
-  isPaying Bool
-  turnNum TurnNum
+  turnNum TurnState
   UniquePlayer playing user
   deriving Eq Show Read Typeable
 Card json doc
@@ -79,5 +78,7 @@ Action json doc
 Involves json doc
   card CardId
   action ActionId
+  toPlayer PlayerId Maybe default=NULL
+  toPropColor ColorId Maybe default=NULL
   UniqueCardAction card action
   deriving Eq Show Read Typeable

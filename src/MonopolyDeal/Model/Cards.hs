@@ -8,7 +8,7 @@ import Database.Persist.TH
 import Data.Aeson.Types
 import Data.Swagger 
   ( ToSchema, SwaggerType(..), NamedSchema(..)
-  , type_, minimum_, maximum_, description, declareNamedSchema )
+  , type_, format, enum_, description, declareNamedSchema )
 import Prelude
 import GHC.Generics
 
@@ -36,39 +36,46 @@ instance ToJSON TargetType
 instance FromJSON TargetType
 instance ToSchema TargetType
 
-data TurnNum = TNotPlaying | TDrawing | T1 | T2 | T3
-  deriving (Show, Read, Eq, Generic)
-instance ToJSON TurnNum where
-  toJSON TNotPlaying = Null
-  toJSON TDrawing    = Number 0
-  toJSON T1          = Number 1
-  toJSON T2          = Number 2
-  toJSON T3          = Number 3
-instance FromJSON TurnNum where
-  parseJSON (Number n) = case n of
-                            0 -> pure TDrawing
-                            1 -> pure T1
-                            2 -> pure T2
-                            3 -> pure T3
-                            _ -> mempty
-  parseJSON (Null) = pure TNotPlaying
-  parseJSON _ = mempty
-instance ToSchema TurnNum where
-  declareNamedSchema _ = pure $ NamedSchema Nothing $ mempty
-    & type_        ?~ SwaggerInteger
-    & minimum_     ?~ 0
-    & maximum_     ?~ 3
-    & description  ?~ "the turn number, can be null if user is not taking a turn"
+data TNum = T1 | T2 | T3 deriving (Show, Read, Eq, Generic)
+fromTNum :: Num n => TNum -> n
+fromTNum T1 = 1 
+fromTNum T2 = 2 
+fromTNum T3 = 3 
+toTNum :: (Eq n, Num n) => n -> Maybe TNum
+toTNum 1 = Just T1 
+toTNum 2 = Just T2 
+toTNum 3 = Just T3 
+toTNum _ = Nothing
 
-nextTurn :: TurnNum -> Maybe TurnNum
-nextTurn TNotPlaying = Nothing
-nextTurn TDrawing = Just T1
-nextTurn T1 = Just T2
-nextTurn T2 = Just T3
-nextTurn T3 = Nothing
+data TurnState = TNotPlaying | TPaying | TDrawing | Turn TNum
+  deriving (Show, Read, Eq, Generic)
+instance ToJSON TurnState where
+  toJSON TNotPlaying = String "none"
+  toJSON TPaying     = String "paying"
+  toJSON TDrawing    = String "drawing"
+  toJSON (Turn n)    = Number $ fromTNum n
+instance FromJSON TurnState where
+  parseJSON (Number n) = maybe mempty (pure . Turn) $ toTNum n
+  parseJSON (String "drawing") = pure TDrawing
+  parseJSON (String "paying") = pure TPaying
+  parseJSON (String "none") = pure TNotPlaying
+  parseJSON _ = mempty
+instance ToSchema TurnState where
+  declareNamedSchema _ = pure $ NamedSchema Nothing $ mempty
+    & type_        ?~ SwaggerString
+    & description  ?~ "the turn number/state that the user is in"
+    & format       ?~ "enum"
+    & enum_        ?~ [ String "drawing", String "paying", String "none"
+                      , Number 1, Number 2, Number 3 ]
+
+nextTurn :: TurnState -> TurnState
+nextTurn TNotPlaying = TNotPlaying
+nextTurn TPaying  = TNotPlaying
+nextTurn TDrawing = Turn T1
+nextTurn (Turn n) = maybe TNotPlaying Turn $ toTNum $ (+) (1 :: Int) $ fromTNum n
 
 derivePersistField "CardType"
 derivePersistField "CardLocation"
 derivePersistField "ActionType"
 derivePersistField "TargetType"
-derivePersistField "TurnNum"
+derivePersistField "TurnState"

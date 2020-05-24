@@ -55,8 +55,25 @@ data CardInfo = CardInfo
   , cardInfoOfPropColor :: Maybe ColorId
   } deriving (Eq, Read, Show, Generic, Typeable)
 
-newtype History = History { unHistory :: [Action] }
+data InvolveInfo = InvolveInfo
+  { involveInfoCard        :: CardInfo
+  , involveInfoToPlayer    :: Maybe PlayerId
+  , involveInfoToPropColor :: Maybe ColorId
+  } deriving (Eq, Read, Show, Generic, Typeable)
+
+data HistoryEntry = HistoryEntry
+  { historyEntryAction   :: Action
+  , historyEntryInvolves :: [InvolveInfo]
+  } deriving (Eq, Read, Show, Generic, Typeable)
+
+newtype History = History { unHistory :: [HistoryEntry] }
   deriving (Eq, Read, Show, Generic, Typeable)
+
+data NewAction = NewAction
+  { newActionCards  :: [CardId]
+  , newActionTarget :: Maybe PlayerId
+  , newActionAction :: AllowedActionId
+  } deriving (Eq, Read, Show, Generic, Typeable) 
 
 deriveAll ''UserAuth
 deriveAll ''NewUser
@@ -66,3 +83,6 @@ deriveAll ''CreatedGame
 deriveAll ''PlayerInfo
 deriveAll ''CardInfo
 deriveAll ''History
+deriveAll ''HistoryEntry
+deriveAll ''InvolveInfo
+deriveAll ''NewAction
