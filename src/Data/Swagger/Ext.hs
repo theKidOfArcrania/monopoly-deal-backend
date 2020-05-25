@@ -15,6 +15,8 @@
 module Data.Swagger.Ext
   ( ToSchema1, OuterBot, declareOuterNamedSchema, liftInnerSchema
   , DeclS
+  , module Data.Swagger.Ext.Desc
+  , module Data.Swagger.Ext.Tags
   ) where
 
 import ClassyPrelude.Yesod             (when)
@@ -26,6 +28,8 @@ import Data.Swagger.Declare            (Declare, looks, declare)
 import Data.Proxy                      (Proxy(..))
 import Control.Lens                    ((?~), (&))
 import Data.HashMap.Strict.InsOrd      (member)
+import Data.Swagger.Ext.Desc
+import Data.Swagger.Ext.Tags
 
 type DeclS a = Declare (Definitions Schema) a
 

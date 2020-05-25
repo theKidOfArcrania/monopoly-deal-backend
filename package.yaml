@@ -47,7 +47,7 @@ dependencies:
 - lens
 - aeson-pretty
 - swagger2
-- servant
+- servant >= 0.13.0
 - servant-swagger
 - insert-ordered-containers
 - utility-ht
