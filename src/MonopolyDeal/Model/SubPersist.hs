@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric     #-}
-module MonopolyDeal.Model.Cards where
+module MonopolyDeal.Model.SubPersist where
 
 import Control.Lens ((?~), (&))
 import Database.Persist.TH
@@ -11,30 +11,27 @@ import Data.Swagger
   , type_, format, enum_, description, declareNamedSchema )
 import Prelude
 import GHC.Generics
+import MonopolyDeal.Model.Util
 
 data CardType = CAction | CProperty | CCash
   deriving (Show, Read, Eq, Generic)
-instance ToJSON CardType
-instance FromJSON CardType
-instance ToSchema CardType
+deriveAllPref ''CardType "C"
 
 data CardLocation = LHand | LCashPile | LDraw | LDiscard | LPropStack
   deriving (Show, Read, Eq, Generic)
-instance ToJSON CardLocation
-instance FromJSON CardLocation
-instance ToSchema CardLocation
+deriveAllPref ''CardLocation "L"
 
 data ActionType = APayment | ARefutal | AGive | APlayCard
   deriving (Show, Read, Eq, Generic)
-instance ToJSON ActionType
-instance FromJSON ActionType
-instance ToSchema ActionType
+deriveAllPref ''ActionType "A"
 
 data TargetType = TSelf | TResponse | TGlobal | TTargeted
   deriving (Show, Read, Eq, Generic)
-instance ToJSON TargetType
-instance FromJSON TargetType
-instance ToSchema TargetType
+deriveAllPref ''TargetType "T"
+
+--data TargetSpec = TSSelf Card | TSResponse
+--  deriving (Show, Read, Eq, Generic)
+--deriveAllPref ''TargetSpec "TS"
 
 data TNum = T1 | T2 | T3 deriving (Show, Read, Eq, Generic)
 fromTNum :: Num n => TNum -> n

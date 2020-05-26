@@ -28,6 +28,7 @@ import qualified Data.ByteString.Lazy as B
 
 -- Descriptions for all captures/queries
 type CGid = Capture' '[Description "The game ID"] ":gid" GameId
+type CDid = Capture' '[Description "The card deck ID"] ":did" CardDeckId
 type QLimit = QueryParam' '[Optional, Description 
   "Number of entries to limit to (default 100)"] "limit" Int
 type QPage = QueryParam' '[Optional, Description 
@@ -43,27 +44,33 @@ type APIAuth = SwaggerTag "auth" "Authentication of services" :>
        ReqBody '[JSON] NewUser  :> Post '[JSON] (Message Nil)
   )
 
-type APIGames = "game" :> SwaggerTag "game" "Accessing and creating games" :> 
-  (    Summary "Obtain all open public games" :>
-       Description "this provides a list of game information similar to the \
-         \/api/v1/game/{gid} endpoint. It currently gives all available \
-         \games (paginated). Private games will be implemented later." :>
-       QPage :> QLimit :>
-       Get '[JSON] (Message Game)
-  :<|> Summary "Create a new game" :>
-       Description "Creates a game, making the host as the creator of this \
-         \game. The host may also choose the card deck (game mode) to play \
-         \from, along with a few other options (not yet fully determined)." :>
-       ReqBody' '[Required, Strict, Description "The configurations for the \
-         \new game. Currently there are only two settings: the name of the \
-         \game and the card deck (as an ID)."] '[JSON] NewGame :>
-       Post '[JSON] (Message CreatedGame)
-  :<|> CGid :> 
-    (    Summary "Obtain information of a specific game" :>
-         Description "Similar to /api/v1/game, but only queries information \
-           \about one specific game. To get more indepth information, use the \
-           \status endpoint instead" :>
-         Get '[JSON] (Message Game)))
+type APIGames = SwaggerTag "game" "Accessing and creating games" :> 
+  (    "game" :> 
+    (    Summary "Obtain all open public games" :>
+         Description "this provides a list of game information similar to the \
+           \/api/v1/game/{gid} endpoint. It currently gives all available \
+           \games (paginated). Private games will be implemented later." :>
+         QPage :> QLimit :>
+         Get '[JSON] (Message Game)
+    :<|> Summary "Create a new game" :>
+         Description "Creates a game, making the host as the creator of this \
+           \game. The host may also choose the card deck (game mode) to play \
+           \from, along with a few other options (not yet fully determined)." :>
+         ReqBody' '[Required, Strict, Description "The configurations for the \
+           \new game. Currently there are only two settings: the name of the \
+           \game and the card deck (as an ID)."] '[JSON] NewGame :>
+         Post '[JSON] (Message CreatedGame)
+    :<|> CGid :> 
+      (    Summary "Obtain information of a specific game" :>
+           Description "Similar to /api/v1/game, but only queries information \
+             \about one specific game. To get more indepth information, use \
+             \the status endpoint instead" :>
+           Get '[JSON] (Message Game)))
+  :<|> "gspec" :> CDid :> 
+       Summary "Obtains the specifications of a card deck" :>
+       Description "TODO" :>
+       Get '[JSON] (Message GameSpec))
+
 
 type APIPlaying = "game" :> CGid :> 
   SwaggerTag "playing" "Playing the game and viewing how the game is" :>

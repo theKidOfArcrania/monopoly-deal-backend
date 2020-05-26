@@ -1,20 +1,17 @@
-{-# LANGUAGE RankNTypes        #-}
 {-# LANGUAGE KindSignatures    #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes        #-}
+{-# LANGUAGE FlexibleContexts  #-}
 module MonopolyDeal.Model 
   ( module MonopolyDeal.Model ) where
 
 import Prelude()
 import ClassyPrelude.Yesod
 import Control.Exception          (throw)
-import MonopolyDeal.Model.Cards   as MonopolyDeal.Model
+import Data.Map                   (fromList)
 import MonopolyDeal.Model.Persist as MonopolyDeal.Model
 import MonopolyDeal.Model.Local   as MonopolyDeal.Model
 import MonopolyDeal.Model.Message as MonopolyDeal.Model
-
--- | A convenient synonym for database access functions.
-type DB a = forall (m :: * -> *).
-  (MonadUnliftIO m) => ReaderT SqlBackend m a
 
 toUser :: NewUser -> User
 toUser ent = User
@@ -73,6 +70,7 @@ queryHistoryEnt action = do
     >>= mapM (infoOf . entityVal)
   pure HistoryEntry 
     { historyEntryAction   = entityVal action
+    , historyEntryId       = entityKey action
     , historyEntryInvolves = ivls
     }
  where infoOf ent = do
@@ -84,6 +82,23 @@ queryHistoryEnt action = do
            , involveInfoToPlayer    = involvesToPlayer ent
            , involveInfoToPropColor = involvesToPropColor ent } 
              :: DB InvolveInfo -- Need this binding at this point...
+
+fromEntList :: (Ord (Key record)) => [Entity record] -> Map (Key record) record
+fromEntList = Data.Map.fromList . map (entityKey &&& entityVal)
+
+-- TODO: flip the arguments
+queryGameSpec :: CardDeck -> CardDeckId -> DB GameSpec
+queryGameSpec deck deckId = do
+  cards <- selectList [CardSpecsPartOf ==. deckId] []
+  actions <- selectList [AllowedActionOfDeck ==. deckId] []
+  colors <- selectList [ColorOfDeck ==. deckId] []
+  pure $ GameSpec
+    { gameSpecDeckInfo    = deck
+    , gameSpecDeckId      = deckId
+    , gameSpecIdToCards   = fromEntList cards
+    , gameSpecIdToActions = fromEntList actions
+    , gameSpecIdToColors  = fromEntList colors
+    }
 
 queryPaginate :: Monad m => (Text -> m (Maybe Int)) -> m [SelectOpt record]
 queryPaginate maybeParam = do

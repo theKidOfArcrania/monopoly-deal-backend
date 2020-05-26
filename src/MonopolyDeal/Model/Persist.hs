@@ -1,4 +1,5 @@
 {-# LANGUAGE EmptyDataDecls             #-}
+{-# LANGUAGE RankNTypes                 #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -14,14 +15,18 @@
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE StandaloneDeriving         #-}
 {-# OPTIONS_GHC -fno-warn-orphans       #-}
-module MonopolyDeal.Model.Persist where
+module MonopolyDeal.Model.Persist
+  ( module MonopolyDeal.Model.Persist ) where
 
 import ClassyPrelude.Yesod
 import Data.Docs.DocGen
 import Database.Persist.Quasi
-import MonopolyDeal.Model.Cards
+import MonopolyDeal.Model.SubPersist as MonopolyDeal.Model.Persist
 import MonopolyDeal.Model.Entity()
 
+-- | A convenient synonym for database access functions.
+type DB a = forall (m :: * -> *).
+  (MonadUnliftIO m) => ReaderT SqlBackend m a
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities

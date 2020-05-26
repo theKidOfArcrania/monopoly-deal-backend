@@ -6,7 +6,6 @@ module MonopolyDeal.Model.Local where
 
 import Prelude ()
 import ClassyPrelude.Yesod
-import MonopolyDeal.Model.Cards
 import MonopolyDeal.Model.Entity()
 import MonopolyDeal.Model.Persist
 import MonopolyDeal.Model.Util
@@ -62,27 +61,51 @@ data InvolveInfo = InvolveInfo
   } deriving (Eq, Read, Show, Generic, Typeable)
 
 data HistoryEntry = HistoryEntry
-  { historyEntryAction   :: Action
+  { historyEntryId       :: ActionId
+  , historyEntryAction   :: Action
   , historyEntryInvolves :: [InvolveInfo]
   } deriving (Eq, Read, Show, Generic, Typeable)
 
 newtype History = History { unHistory :: [HistoryEntry] }
   deriving (Eq, Read, Show, Generic, Typeable)
 
+data Target = Target
+  { targetPlayer :: PlayerId
+  , targetProp   :: Maybe CardId
+  , targetSet    :: Maybe ColorId
+  } deriving (Eq, Read, Show, Generic, Typeable)
+
+data ActionSpec = SpecPlays {specPlays :: CardId} 
+                | SpecTargets {specTargets :: Target}
+                | SpecGives {specGives :: CardId}
+  deriving (Eq, Read, Show, Generic, Typeable)
+
 data NewAction = NewAction
-  { newActionCards  :: [CardId]
-  , newActionTarget :: Maybe PlayerId
-  , newActionAction :: AllowedActionId
+  { newActionAction   :: AllowedActionId
+  , newActionSpecs    :: ActionSpec
+  , newActionResponds :: Maybe ActionId
+  } deriving (Eq, Read, Show, Generic, Typeable) 
+
+data GameSpec = GameSpec
+  { gameSpecDeckInfo       :: CardDeck
+  , gameSpecDeckId         :: CardDeckId
+  , gameSpecIdToCards      :: Map CardSpecsId CardSpecs
+  , gameSpecIdToActions    :: Map AllowedActionId AllowedAction
+  , gameSpecIdToColors     :: Map ColorId Color
   } deriving (Eq, Read, Show, Generic, Typeable) 
 
 deriveAll ''UserAuth
 deriveAll ''NewUser
+deriveAll ''HistoryEntry
 deriveAll ''GameStatus
 deriveAll ''NewGame
 deriveAll ''CreatedGame
 deriveAll ''PlayerInfo
 deriveAll ''CardInfo
-deriveAll ''History
-deriveAll ''HistoryEntry
 deriveAll ''InvolveInfo
+deriveAll ''History
 deriveAll ''NewAction
+deriveAll ''Target
+deriveAll ''GameSpec
+deriveAllPrefUnion ''ActionSpec "Spec"
+

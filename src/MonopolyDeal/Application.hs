@@ -53,6 +53,7 @@ import MonopolyDeal.Handler.Common
 import MonopolyDeal.Handler.Home
 import MonopolyDeal.Handler.Games
 import MonopolyDeal.Handler.Login
+import MonopolyDeal.Handler.Playing
 import MonopolyDeal.Handler.SwaggerFront
 
 -- This line actually creates our YesodDispatch instance. It is the second half

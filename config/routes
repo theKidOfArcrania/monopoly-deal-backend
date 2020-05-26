@@ -11,12 +11,13 @@
 
 -- Override !auth with !noauth
 /api/v1/ ApiR !auth:
-  /login                JsonLoginR    POST      !noauth
-  /signup               SignupR       POST      !noauth
-  /game                 GamesR        GET POST
-  /game/#GameId         GameR         GET
-  /game/#GameId/status  GameStatusR   GET
-  /game/#GameId/play    GamePlayR     GET POST
+  /login                  JsonLoginR    POST      !noauth
+  /signup                 SignupR       POST      !noauth
+  /game                   GamesR        GET POST
+  /gspec/#CardDeckId      GameSpecR     GET       !noauth 
+  /game/#GameId           GameR         GET
+  /game/#GameId/status    GameStatusR   GET
+  /game/#GameId/play      GamePlayR     GET POST
 /viewapi/ ViewApiR:
   /              ApiUIR          GET
   /swagger.html  SwaggerFrontR   GET

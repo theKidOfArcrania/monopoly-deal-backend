@@ -1,18 +1,20 @@
 {-# LANGUAGE TemplateHaskellQuotes #-}
+{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE OverloadedLists       #-}
+{-# LANGUAGE OverloadedStrings     #-}
 module MonopolyDeal.Model.Util 
-  ( entDSOptions, entDAOptions, deriveAll
-  , declareEndpoint, declareSubOperationsFor) where
+  ( entDSOptions, entDAOptions, deriveAll, deriveAllPref, fixComplexUnion
+  , deriveAllPrefUnion) where
 
 import Prelude ()
 import Control.Lens
 import ClassyPrelude.Yesod
 import Language.Haskell.TH.Syntax
-import qualified Data.Proxy       as P
+import Data.Aeson       as DA
+import Data.Aeson.TH    as DA
+import Data.Swagger     as DS
 import qualified Data.Char        as DC
-import qualified Data.Aeson       as DA
-import qualified Data.Aeson.TH    as DA
-import qualified Data.Swagger     as DS
-import qualified Servant.Swagger  as DS
+import qualified Data.HashMap.Strict.InsOrd as InsOrd
 
 maybeStripPrefix :: String -> String -> String
 maybeStripPrefix pref sym = case stripPrefix pref sym of
@@ -23,60 +25,58 @@ lcaseFirst :: String -> String
 lcaseFirst str = case str of
                x : xs -> (DC.toLower x) : xs
                []     -> []
+ucaseFirst :: String -> String
+ucaseFirst str = case str of
+               x : xs -> (DC.toUpper x) : xs
+               []     -> []
 
 recordStrip :: String -> String -> String
 recordStrip pref = lcaseFirst . maybeStripPrefix pref 
 
 entDSOptions :: String -> DS.SchemaOptions
-entDSOptions pref =
-  DS.defaultSchemaOptions 
-    { DS.fieldLabelModifier = recordStrip pref
-    , DS.unwrapUnaryRecords = True }
+entDSOptions pref = DS.fromAesonOptions $ entDAOptions pref 
 
 entDAOptions :: String -> DA.Options
 entDAOptions pref =
   DA.defaultOptions 
-    { DA.fieldLabelModifier = recordStrip pref
+    { DA.fieldLabelModifier = recordStrip $ lcaseFirst pref
+    , DA.constructorTagModifier = recordStrip $ ucaseFirst pref
     , DA.unwrapUnaryRecords = True }
 
 deriveAll :: Name -> Q [Dec]
-deriveAll cls = do
+deriveAll cls = deriveAllPref cls $ nameBase cls
+
+deriveAllPref :: Name -> String -> Q [Dec]
+deriveAllPref cls pref = do
   nm1 <- newName "x"
   jsons <- DA.deriveJSON (entDAOptions pref) cls
   pure $ schemaInst nm1 : jsons
- where pref = lcaseFirst $ nameBase cls
-       schOptsE = VarE 'entDSOptions `AppE` LitE (StringL pref)
+ where schOptsE = VarE 'entDSOptions `AppE` LitE (StringL pref)
        schemaInst nm1 = typeInstanceD ''DS.ToSchema cls 
         [ assignD 'DS.declareNamedSchema $ LamE [VarP nm1]
           (VarE 'DS.genericDeclareNamedSchema `AppE` schOptsE `AppE` VarE nm1)
         ]
        
--- Declares an endpoint (the actual API type and a proxy object pointing to this
--- API endpoint). The API type is prefixed with "API" and the proxy object is
--- prefixed with "p", both followed by a user provided string. You also must
--- pass the API type as a TH-quote
-declareEndpoint :: String -> Q Type -> Q [Dec]
-declareEndpoint name qapi = do
-  api <- qapi
-  pure 
-    [ TySynD apiName [] api
-    , SigD proxName (ConT ''P.Proxy `AppT` ConT apiName)
-    , assignD proxName (ConE 'P.Proxy)
-    ]
- where apiName = mkName ("API" ++ name)
-       proxName = mkName ("p" ++ name)
+deriveAllPrefUnion :: Name -> String -> Q [Dec]
+deriveAllPrefUnion cls pref = do
+  nm1 <- newName "x"
+  jsons <- DA.deriveJSON (entDAOptions pref) cls
+  pure $ schemaInst nm1 : jsons
+ where schOptsE = VarE 'entDSOptions `AppE` LitE (StringL pref)
+       schemaInst nm1 = typeInstanceD ''DS.ToSchema cls 
+        [ assignD 'DS.declareNamedSchema $ LamE [VarP nm1]
+          ((VarE 'fmap `AppE` VarE 'fixComplexUnion) 
+            `AppE` (VarE 'DS.genericDeclareNamedSchema 
+              `AppE` schOptsE `AppE` VarE nm1))
+        ]
 
-declareSubOperationsFor :: Name -> [String] -> Q [Dec]
-declareSubOperationsFor pAll subs = do
-  let prod sub =
-                [ SigD soName (ConT ''Traversal' `AppT` ConT ''DS.Swagger 
-                  `AppT` ConT ''DS.Operation)
-                , assignD soName (VarE 'DS.subOperations `AppE` VarE proxName 
-                  `AppE` VarE pAll)
-                ]
-                 where soName = mkName ("so" ++ sub)
-                       proxName = mkName ("p" ++ sub)
-  pure $ concat $ map prod subs
+fixComplexUnion :: NamedSchema -> NamedSchema
+fixComplexUnion nsch = 
+  nsch & over (schema.properties) (InsOrd.insert "tag" $ DS.Inline (mempty
+    & type_       ?~ SwaggerString
+    & description ?~ "Denotes the union type of this object"
+    & format      ?~ "enum"
+    & enum_       ?~ map String (InsOrd.keys $ nsch ^. schema.properties)))
 
 assignD :: Name -> Exp -> Dec
 assignD var expr = ValD (VarP var) (NormalB expr) []

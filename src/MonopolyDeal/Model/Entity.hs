@@ -19,10 +19,11 @@ import Data.Aeson
   , toJSONKey, fromJSONKey)
 import Data.Aeson.Types (contramapToJSONKeyFunction, mapFromJSONKeyFunction)
 import Data.Aeson.Encoding (text)
-import Data.Proxy           (Proxy(..))
+import Data.Typeable        (Proxy(..), Typeable, showsTypeRep, typeRep)
 import Data.Swagger         
   ( NamedSchema(..), SwaggerType(..), ToSchema(..), Referenced(..)
-  , ToParamSchema(..), allOf, declareSchemaRef, type_, properties)
+  , ToParamSchema(..), allOf, declareSchemaRef, type_, properties
+  , description, paramSchemaToSchema)
 
 
 instance ToSchema (BackendKey SqlBackend) where
@@ -32,7 +33,9 @@ instance ToSchema (BackendKey SqlBackend) where
 instance ToParamSchema (BackendKey SqlBackend) where
   toParamSchema _ = mempty & type_ ?~ SwaggerInteger
 
--- Technically could be as generic as a generic read
+
+-- Technically could be as generic as a generic read, but we might have
+-- overlapping instances that way.
 instance ToJSONKey (BackendKey SqlBackend) where
   toJSONKey = ToJSONKeyText f g
     where f = pack . show
@@ -55,9 +58,18 @@ instance (k ~ (Key a), ToSchema a, ToSchema k) =>
           , entSchema
           ]
 
-instance (ToBackendKey backend record, k ~ (Key record)
-  , ToJSONKey (BackendKey backend)) => ToJSONKey (Key record) where
+-- Schema and JSON instances for all keys
+instance (ToParamSchema (Key record), Typeable record) =>
+  ToSchema (Key record) where
+    declareNamedSchema p = pure $ NamedSchema Nothing $ paramSchemaToSchema p
+      & description ?~ pack (showsTypeRep recType " ID")
+     where recType = typeRep (Proxy :: Proxy record) 
+instance (ToBackendKey backend record, ToParamSchema (BackendKey backend)) =>
+  ToParamSchema (Key record) where
+    toParamSchema _ = toParamSchema (Proxy :: Proxy (BackendKey backend)) 
+instance (ToBackendKey backend record, ToJSONKey (BackendKey backend)) =>
+  ToJSONKey (Key record) where
     toJSONKey = contramapToJSONKeyFunction toBackendKey toJSONKey
-instance (ToBackendKey backend record, k ~ (Key record)
-  , FromJSONKey (BackendKey backend)) => FromJSONKey (Key record) where
+instance (ToBackendKey backend record, FromJSONKey (BackendKey backend)) =>
+  FromJSONKey (Key record) where
     fromJSONKey = mapFromJSONKeyFunction fromBackendKey fromJSONKey

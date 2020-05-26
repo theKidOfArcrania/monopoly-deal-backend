@@ -14,12 +14,12 @@
 module Data.Docs.DocGen where
 
 import ClassyPrelude.Yesod 
-  ( BackendKey, MkPersistSettings, EntityDef, FieldType(..)
+  ( MkPersistSettings, EntityDef, FieldType(..)
   , entityAttrs, entityHaskell, entityFields, fieldType, fieldHaskell
-  , mpsBackend, unHaskellName
+  , unHaskellName
   , String, Text, Int64, Maybe(..)
   , concat, find, filter, id, isJust, map, mapM, return, unpack
-  , (.), ($), (==), (<>)
+  , (.), ($), (==)
   ) 
 import Control.Lens ((&), (.~))
 import Data.Swagger
@@ -81,21 +81,10 @@ mkSchema settings ent = do
         , NoBindS body
         ]
       ]
-    , typeInstanceD ''ToSchema idName 
-      [ assignD 'declareNamedSchema $ LamE [WildP] 
-        (VarE 'declareNamedSchema `AppE` (proxyE `SigE` proxyOf backendkeyT))
-      ]
-    , typeInstanceD ''ToParamSchema idName
-      [ assignD 'toParamSchema $ LamE [WildP] 
-        (VarE 'toParamSchema `AppE` (proxyE `SigE` proxyOf backendkeyT))
-      ]
     ]
  where ents = entityFields ent
        proxyE = ConE 'Proxy
        proxyOf = AppT $ ConT ''Proxy
-       backendkeyT = ConT ''BackendKey `AppT` mpsBackend settings
-       idName = mkName $ entName ent <> "Id"
-       
 
 -- A normal assignment with no where clause
 assignD :: Name -> Exp -> Dec
